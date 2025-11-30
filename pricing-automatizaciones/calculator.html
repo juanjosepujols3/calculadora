@@ -409,7 +409,7 @@
       border: 1px dashed var(--border);
       font-size: 14px;
       color: var(--text);
-      white-space: pre-line;
+      white-space: pre-wrap;
     }
 
     .contract-editor {
@@ -650,7 +650,11 @@
         <div class="scenario-cards" id="scenarioCards"></div>
 
         <div class="summary-box" id="summaryBox"></div>
-        <div class="contract-box" id="contractBox"></div>
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:8px;">
+          <strong style="color:var(--muted); font-size:13px;">Presupuesto para el cliente (editable)</strong>
+          <span style="color:var(--muted); font-size:12px;">Este texto se actualiza con los cálculos; puedes ajustarlo antes de enviar/imprimir.</span>
+        </div>
+        <div class="contract-box" id="contractBox" contenteditable="true"></div>
         <div class="inline-actions">
           <span class="tag" id="healthTag"></span>
         </div>
@@ -836,21 +840,36 @@
       const client = inputs.clientName.value.trim() || 'Cliente';
       const notes = inputs.notes.value.trim() || 'Alcance resumido no especificado.';
       const modeText = paymentMode === 'one-time'
-        ? `Pago único por setup: ${fmtCurrency.format(res.setupRecommended)}`
-        : `Setup: ${fmtCurrency.format(res.setupRecommended)} + Mensual: ${fmtCurrency.format(res.monthlyRecommended)}`;
+        ? `Pago único por implementación: ${fmtCurrency.format(res.setupRecommended)}`
+        : `Inversión propuesta: Setup ${fmtCurrency.format(res.setupRecommended)} + Mensual ${fmtCurrency.format(res.monthlyRecommended)}`;
+      const paybackText = res.paybackMonths ? `${fmtNum.format(res.paybackMonths)} meses` : 'No alcanzable con los datos actuales';
+      const roiText = res.roi12 != null ? fmtPercent.format(res.roi12) : 'N/A';
+      const today = new Date().toLocaleDateString('es-ES');
       return [
-        `Propuesta para: ${client}`,
-        `Escenario seleccionado: ${label} (${paymentMode === 'one-time' ? 'Pago único' : 'Mantenimiento mensual'})`,
-        `Términos económicos: ${modeText}`,
-        `ROI estimado 12m: ${res.roi12 != null ? fmtPercent.format(res.roi12) : 'N/A'}`,
-        `Payback estimado: ${res.paybackMonths ? fmtNum.format(res.paybackMonths) + ' meses' : 'No alcanzable con los datos actuales'}`,
-        '',
-        `Alcance / Notas: ${notes}`,
-        '',
+        `Fecha: ${today}`,
+        `Presupuesto para: ${client}`,
+        ``,
+        `Resumen ejecutivo`,
+        `- Inversión propuesta: ${modeText}`,
+        `- ROI estimado a 12 meses: ${roiText}`,
+        `- Payback estimado: ${paybackText}`,
+        `- Ahorro mensual de tiempo: ${fmtNum.format(res.hoursMonth)} horas (~${fmtCurrency.format(res.savings)} de valor)`,
+        `- Valor mensual generado (ahorro + incremento): ${fmtCurrency.format(res.valueMonthly)}`,
+        ``,
+        `Beneficios clave al implementar:`,
+        `- Menos horas operativas y menor error humano gracias a automatización n8n.`,
+        `- Más velocidad en onboarding/seguimiento → mejor conversión y retención.`,
+        `- Visibilidad y alertas automáticas para decisiones más rápidas.`,
+        ``,
+        `Alcance resumido:`,
+        `${notes}`,
+        ``,
         `Condiciones:`,
-        `- Facturación en USD. Ajustes y cambios fuera de alcance se cotizan aparte.`,
-        `- Vigencia de la oferta: 15 días desde la emisión.`,
-        `- Forma de pago: 50% al inicio, 50% al entregar (o pago completo si es mensualidad activa).`
+        `- Facturación en ${currency}. Cambios fuera de alcance se cotizan aparte.`,
+        `- Vigencia de la oferta: 15 días.`,
+        `- Forma de pago: 50% al inicio y 50% al entregar (o pago completo si aplica pago único).`,
+        ``,
+        `Próximo paso: confirma este presupuesto para agendar kickoff y activar la implementación.`
       ].join('\n');
     }
 
