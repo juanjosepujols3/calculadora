@@ -106,8 +106,8 @@
     }
 
     .layout {
-      display: grid;
-      grid-template-columns: 1.1fr 0.9fr;
+      display: flex;
+      flex-direction: column;
       gap: 16px;
     }
 
@@ -134,7 +134,7 @@
     }
 
     .grid.two {
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     }
 
     label {
@@ -143,6 +143,57 @@
       gap: 6px;
       font-size: 13px;
       color: var(--muted);
+    }
+
+    .label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      color: var(--text);
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .help-icon {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: var(--text);
+      cursor: pointer;
+      position: relative;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .help-icon::after {
+      content: attr(data-tip);
+      position: absolute;
+      left: 50%;
+      bottom: 130%;
+      transform: translateX(-50%);
+      min-width: 200px;
+      max-width: 260px;
+      background: #0b1224;
+      color: var(--text);
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.12s ease;
+      box-shadow: var(--shadow);
+      font-size: 12px;
+      line-height: 1.4;
+      z-index: 10;
+    }
+
+    .help-icon:hover::after {
+      opacity: 1;
     }
 
     input[type="number"], textarea {
@@ -185,6 +236,13 @@
     .chip.active {
       border-color: rgba(124, 58, 237, 0.6);
       background: linear-gradient(135deg, rgba(124, 58, 237, 0.24), rgba(34, 211, 238, 0.18));
+    }
+
+    .scenario-note {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 6px;
+      line-height: 1.4;
     }
 
     .results-hero {
@@ -297,9 +355,43 @@
       border-color: rgba(248, 113, 113, 0.3);
     }
 
+    .paymode-toggle {
+      display: inline-flex;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .paymode-toggle button {
+      background: transparent;
+      border: none;
+      color: var(--text);
+      padding: 10px 14px;
+      box-shadow: none;
+      border-right: 1px solid var(--border);
+    }
+
+    .paymode-toggle button:last-child { border-right: none; }
+
+    .paymode-toggle button.active {
+      background: linear-gradient(135deg, rgba(124, 58, 237, 0.35), rgba(34, 211, 238, 0.25));
+      color: var(--text);
+    }
+
+    .contract-box {
+      margin-top: 12px;
+      padding: 14px;
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px dashed var(--border);
+      font-size: 14px;
+      color: var(--text);
+      white-space: pre-line;
+    }
+
     @media (max-width: 960px) {
       body { padding: 20px; }
-      .layout { grid-template-columns: 1fr; }
+      .layout { flex-direction: column; }
       .topbar { align-items: flex-start; }
     }
 
@@ -322,7 +414,8 @@
       </div>
       <div class="actions">
         <button class="secondary" id="copy-summary">Copiar resumen</button>
-        <button id="print-page">Imprimir / PDF</button>
+        <button class="secondary" id="send-email">Enviar por email</button>
+        <button id="print-contract">Imprimir / contrato</button>
       </div>
     </header>
 
@@ -330,38 +423,89 @@
       <section class="card">
         <h3>Inputs clave</h3>
         <div class="grid two">
-          <label>Horas ahorradas por semana
+          <label>
+            <div class="label-row">
+              Horas ahorradas por semana
+              <span class="help-icon" data-tip="Horas que el cliente deja de dedicar por semana gracias a la automatización.">?</span>
+            </div>
             <input type="number" id="hoursWeek" min="0" step="0.1" value="8" />
           </label>
-          <label>Coste por hora del cliente
+          <label>
+            <div class="label-row">
+              Coste por hora del cliente
+              <span class="help-icon" data-tip="Tarifa por hora del equipo/cliente (USD) para valorar el ahorro de tiempo.">?</span>
+            </div>
             <input type="number" id="clientRate" min="0" step="1" value="45" />
           </label>
-          <label>Beneficio incremental mensual
+          <label>
+            <div class="label-row">
+              Beneficio incremental mensual
+              <span class="help-icon" data-tip="Ingresos adicionales mensuales esperados (ventas, retención, etc.).">?</span>
+            </div>
             <input type="number" id="incremental" min="0" step="10" value="300" />
           </label>
-          <label>Coste mensual de herramientas
+          <label>
+            <div class="label-row">
+              Coste mensual de herramientas
+              <span class="help-icon" data-tip="Licencias y suscripciones mensuales (p. ej., n8n cloud, email, CRM).">?</span>
+            </div>
             <input type="number" id="tools" min="0" step="10" value="60" />
           </label>
-          <label>Horas de implementación (setup)
+          <label>
+            <div class="label-row">
+              Horas de implementación (setup)
+              <span class="help-icon" data-tip="Horas totales para configurar la solución (diseño, integraciones, QA).">?</span>
+            </div>
             <input type="number" id="setupHours" min="0" step="1" value="18" />
           </label>
-          <label>Horas de mantenimiento / mes
+          <label>
+            <div class="label-row">
+              Horas de mantenimiento / mes
+              <span class="help-icon" data-tip="Horas mensuales de soporte y ajustes para mantener la automatización.">?</span>
+            </div>
             <input type="number" id="maintenanceHours" min="0" step="0.5" value="4" />
           </label>
-          <label>Tu tarifa por hora
+          <label>
+            <div class="label-row">
+              Tu tarifa por hora
+              <span class="help-icon" data-tip="Tu tarifa o costo interno por hora.">?</span>
+            </div>
             <input type="number" id="myRate" min="0" step="1" value="75" />
           </label>
-          <label>Margen deseado (%)
+          <label>
+            <div class="label-row">
+              Margen deseado (%)
+              <span class="help-icon" data-tip="Markup que quieres aplicar sobre tus costes (ej. 40 = +40%).">?</span>
+            </div>
             <input type="number" id="margin" min="0" step="1" value="40" />
           </label>
-          <label>% de valor capturado
+          <label>
+            <div class="label-row">
+              % de valor capturado
+              <span class="help-icon" data-tip="Porcentaje del valor generado que quieres capturar como precio.">?</span>
+            </div>
             <input type="number" id="capture" min="0" step="1" value="18" />
           </label>
-          <label>Factor de riesgo / complejidad
+          <label>
+            <div class="label-row">
+              Factor de riesgo / complejidad
+              <span class="help-icon" data-tip="Multiplicador por complejidad o riesgo (1.0 = normal, >1 = más exigente).">?</span>
+            </div>
             <input type="number" id="risk" min="0.5" step="0.05" value="1.0" />
           </label>
-          <label>Payback objetivo (meses)
+          <label>
+            <div class="label-row">
+              Payback objetivo (meses)
+              <span class="help-icon" data-tip="Meses en los que el cliente busca recuperar la inversión.">?</span>
+            </div>
             <input type="number" id="paybackTarget" min="1" step="0.5" value="4" />
+          </label>
+          <label>
+            <div class="label-row">
+              Nombre del cliente (opcional)
+              <span class="help-icon" data-tip="Se usará en el resumen y el contrato al imprimir/enviar.">?</span>
+            </div>
+            <input type="text" id="clientName" placeholder="Ej: ACME Inc." />
           </label>
         </div>
 
@@ -372,10 +516,22 @@
       </section>
 
       <section class="card">
-        <div class="scenario-chips">
-          <div class="chip active" data-scenario="base">Base</div>
-          <div class="chip" data-scenario="conservative">Conservador</div>
-          <div class="chip" data-scenario="aggressive">Agresivo</div>
+        <div style="display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between;">
+          <div>
+            <div class="scenario-chips">
+              <div class="chip active" data-scenario="base">Base</div>
+              <div class="chip" data-scenario="conservative">Conservador</div>
+              <div class="chip" data-scenario="aggressive">Agresivo</div>
+            </div>
+            <div class="scenario-note">Base = parámetros estándar; Conservador = margen/captura reducidos, menor riesgo; Agresivo = margen/captura altos y mayor riesgo.</div>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:6px; align-items:flex-end;">
+            <span style="color:var(--muted); font-size:12px;">Modo de cobro</span>
+            <div class="paymode-toggle">
+              <button type="button" data-paymode="subscription" class="active">Mantenimiento mensual</button>
+              <button type="button" data-paymode="one-time">Pago único</button>
+            </div>
+          </div>
         </div>
 
         <div class="results-hero">
@@ -417,6 +573,7 @@
         <div class="scenario-cards" id="scenarioCards"></div>
 
         <div class="summary-box" id="summaryBox"></div>
+        <div class="contract-box" id="contractBox"></div>
         <div class="inline-actions">
           <span class="tag" id="healthTag"></span>
         </div>
@@ -437,10 +594,12 @@
       capture: document.getElementById('capture'),
       risk: document.getElementById('risk'),
       paybackTarget: document.getElementById('paybackTarget'),
-      notes: document.getElementById('notes')
+      notes: document.getElementById('notes'),
+      clientName: document.getElementById('clientName')
     };
 
     const scenarioButtons = Array.from(document.querySelectorAll('.chip[data-scenario]'));
+    const paymodeButtons = Array.from(document.querySelectorAll('[data-paymode]'));
     const scenarioDefs = {
       base: { label: 'Base', multipliers: { margin: 1, capture: 1, risk: 1 } },
       conservative: { label: 'Conservador', multipliers: { margin: 0.65, capture: 0.6, risk: 0.95 } },
@@ -452,6 +611,7 @@
     const fmtNum = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 1 });
 
     let currentScenario = 'base';
+    let paymentMode = 'subscription'; // 'subscription' | 'one-time'
 
     function val(inputEl) {
       const n = Number(inputEl.value);
@@ -514,28 +674,35 @@
       const selectedScenario = scenarioDefs[currentScenario];
       const result = calculate(baseInputs, selectedScenario.multipliers);
 
+      const monthlyFinal = paymentMode === 'one-time' ? 0 : result.monthlyRecommended;
+      const denom = result.valueMonthly - monthlyFinal;
+      const payback = denom > 0 ? result.setupRecommended / denom : null;
+      const totalCostYear = result.setupRecommended + (monthlyFinal * 12);
+      const roi12 = totalCostYear > 0 ? (result.valueMonthly * 12 - totalCostYear) / totalCostYear : null;
+
       document.getElementById('setupOut').textContent = fmtCurrency.format(result.setupRecommended);
-      document.getElementById('monthlyOut').textContent = fmtCurrency.format(result.monthlyRecommended);
+      document.getElementById('monthlyOut').textContent = paymentMode === 'one-time' ? '— (pago único)' : fmtCurrency.format(monthlyFinal);
       document.getElementById('setupBase').textContent = `Coste base: ${fmtCurrency.format(result.costSetup)}`;
-      document.getElementById('monthlyDetail').textContent = `Coste puro: ${fmtCurrency.format(result.costMonthly)} · Valor capturado: ${fmtCurrency.format(result.valueMonthly * result.capture)}`;
+      document.getElementById('monthlyDetail').textContent = paymentMode === 'one-time'
+        ? 'Modo pago único: no se factura mensual.'
+        : `Coste puro: ${fmtCurrency.format(result.costMonthly)} · Valor capturado: ${fmtCurrency.format(result.valueMonthly * result.capture)}`;
       document.getElementById('valueOut').textContent = fmtCurrency.format(result.valueMonthly);
       document.getElementById('savingsOut').textContent = `${fmtCurrency.format(result.savings)} ahorro + ${fmtCurrency.format(baseInputs.incremental)} extra`;
       document.getElementById('costsOut').textContent = fmtCurrency.format(result.costMonthly + result.costSetup / 12);
       document.getElementById('costsDetail').textContent = `Mantenimiento: ${fmtCurrency.format(result.costMonthly - baseInputs.tools)} · Herramientas: ${fmtCurrency.format(baseInputs.tools)}`;
 
-      const payback = result.paybackMonths;
       const paybackTarget = baseInputs.paybackTarget;
       const paybackText = payback ? `${fmtNum.format(payback)} meses` : 'N/A';
       document.getElementById('paybackOut').textContent = paybackText;
       document.getElementById('paybackGap').textContent = payback ? `Objetivo: ${paybackTarget} meses` : 'Objetivo: no alcanzable con estos datos';
 
-      const roiText = result.roi12 != null ? fmtPercent.format(result.roi12) : 'N/A';
+      const roiText = roi12 != null ? fmtPercent.format(roi12) : 'N/A';
       document.getElementById('roiOut').textContent = roiText;
-      document.getElementById('roiDetail').textContent = `Costo total año: ${fmtCurrency.format(result.setupRecommended + result.monthlyRecommended * 12)}`;
+      document.getElementById('roiDetail').textContent = `Costo total año: ${fmtCurrency.format(totalCostYear)}`;
 
       renderScenarios(baseInputs);
-      renderSummary(selectedScenario.label, result, baseInputs);
-      renderHealth(result, paybackTarget);
+      renderSummary(selectedScenario.label, { ...result, monthlyRecommended: monthlyFinal, paybackMonths: payback, roi12 });
+      renderHealth({ ...result, paybackMonths: payback }, paybackTarget);
     }
 
     function renderScenarios(baseInputs) {
@@ -543,6 +710,9 @@
       container.innerHTML = '';
       Object.entries(scenarioDefs).forEach(([key, def]) => {
         const res = calculate(baseInputs, def.multipliers);
+        const monthlyFinal = paymentMode === 'one-time' ? 0 : res.monthlyRecommended;
+        const totalCostYear = res.setupRecommended + (monthlyFinal * 12);
+        const roiDisplay = totalCostYear > 0 ? (res.valueMonthly * 12 - totalCostYear) / totalCostYear : null;
         const card = document.createElement('div');
         card.className = 'scenario-card';
         card.innerHTML = `
@@ -550,29 +720,54 @@
           <div class="metric-sub">Margen ${(baseInputs.margin * def.multipliers.margin).toFixed(1)}% · Captura ${(baseInputs.capture * def.multipliers.capture).toFixed(1)}% · Riesgo ${res.risk.toFixed(2)}x</div>
           <div class="metric-value" style="font-size:22px;">${fmtCurrency.format(res.setupRecommended)}</div>
           <div class="metric-sub">Setup recomendado</div>
-          <div class="metric-value" style="font-size:20px;">${fmtCurrency.format(res.monthlyRecommended)}</div>
-          <div class="metric-sub">Mensual recomendado</div>
-          <div class="metric-sub" style="margin-top:6px;">ROI 12m: ${res.roi12 != null ? fmtPercent.format(res.roi12) : 'N/A'}</div>
+          <div class="metric-value" style="font-size:20px;">${paymentMode === 'one-time' ? '—' : fmtCurrency.format(monthlyFinal)}</div>
+          <div class="metric-sub">${paymentMode === 'one-time' ? 'Pago único (sin mensual)' : 'Mensual recomendado'}</div>
+          <div class="metric-sub" style="margin-top:6px;">ROI 12m: ${roiDisplay != null ? fmtPercent.format(roiDisplay) : 'N/A'}</div>
         `;
         container.appendChild(card);
       });
     }
 
-    function renderSummary(label, res, baseInputs) {
+    function renderSummary(label, res) {
       const payback = res.paybackMonths ? `${fmtNum.format(res.paybackMonths)} meses` : 'No alcanzable con los supuestos actuales';
       const roi = res.roi12 != null ? fmtPercent.format(res.roi12) : 'N/A';
+      const client = inputs.clientName.value.trim() || 'Cliente';
       const summary = [
-        `Escenario: ${label}`,
+        `Escenario: ${label} · Modo: ${paymentMode === 'one-time' ? 'Pago único' : 'Mantenimiento mensual'}`,
+        `Cliente: ${client}`,
         `Setup recomendado: ${fmtCurrency.format(res.setupRecommended)}`,
-        `Mensual recomendado: ${fmtCurrency.format(res.monthlyRecommended)}`,
-        `Payback estimado: ${payback} (objetivo ${baseInputs.paybackTarget} meses)`,
+        `Mensual recomendado: ${paymentMode === 'one-time' ? '—' : fmtCurrency.format(res.monthlyRecommended)}`,
+        `Payback estimado: ${payback}`,
         `ROI 12m: ${roi}`,
-        `Valor mensual generado: ${fmtCurrency.format(res.valueMonthly)} (ahorro ${fmtCurrency.format(res.savings)} + extra ${fmtCurrency.format(baseInputs.incremental)})`,
+        `Valor mensual generado: ${fmtCurrency.format(res.valueMonthly)} (ahorro ${fmtCurrency.format(res.savings)} + extra ${fmtCurrency.format(val(inputs.incremental))})`,
         `Coste mensual (mantenimiento + herramientas): ${fmtCurrency.format(res.costMonthly)}`,
         '',
         `Notas: ${inputs.notes.value.trim() || '—'}`
       ].join('\n');
       document.getElementById('summaryBox').textContent = summary;
+      document.getElementById('contractBox').textContent = buildContractText(label, res);
+    }
+
+    function buildContractText(label, res) {
+      const client = inputs.clientName.value.trim() || 'Cliente';
+      const notes = inputs.notes.value.trim() || 'Alcance resumido no especificado.';
+      const modeText = paymentMode === 'one-time'
+        ? `Pago único por setup: ${fmtCurrency.format(res.setupRecommended)}`
+        : `Setup: ${fmtCurrency.format(res.setupRecommended)} + Mensual: ${fmtCurrency.format(res.monthlyRecommended)}`;
+      return [
+        `Propuesta para: ${client}`,
+        `Escenario seleccionado: ${label} (${paymentMode === 'one-time' ? 'Pago único' : 'Mantenimiento mensual'})`,
+        `Términos económicos: ${modeText}`,
+        `ROI estimado 12m: ${res.roi12 != null ? fmtPercent.format(res.roi12) : 'N/A'}`,
+        `Payback estimado: ${res.paybackMonths ? fmtNum.format(res.paybackMonths) + ' meses' : 'No alcanzable con los datos actuales'}`,
+        '',
+        `Alcance / Notas: ${notes}`,
+        '',
+        `Condiciones:`,
+        `- Facturación en USD. Ajustes y cambios fuera de alcance se cotizan aparte.`,
+        `- Vigencia de la oferta: 15 días desde la emisión.`,
+        `- Forma de pago: 50% al inicio, 50% al entregar (o pago completo si es mensualidad activa).`
+      ].join('\n');
     }
 
     function renderHealth(res, target) {
@@ -600,9 +795,24 @@
       });
     });
 
+    paymodeButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        paymentMode = btn.dataset.paymode;
+        paymodeButtons.forEach(b => b.classList.toggle('active', b === btn));
+        updateUI();
+      });
+    });
+
     Object.values(inputs).forEach(el => el.addEventListener('input', updateUI));
 
-    document.getElementById('print-page').addEventListener('click', () => window.print());
+    document.getElementById('print-contract').addEventListener('click', () => window.print());
+
+    document.getElementById('send-email').addEventListener('click', () => {
+      const text = document.getElementById('contractBox').textContent;
+      const subject = `Presupuesto automatización - ${inputs.clientName.value.trim() || 'Cliente'}`;
+      const mailto = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(text)}`;
+      window.location.href = mailto;
+    });
 
     document.getElementById('copy-summary').addEventListener('click', async () => {
       const text = document.getElementById('summaryBox').textContent;
